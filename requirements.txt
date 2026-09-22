@@ -1,0 +1,7 @@
+yt-dlp
+faster-whisper==1.1.1
+tensorflow-cpu==2.15.1
+tensorflow-hub==0.15.0
+numpy<2
+birdnetlib==0.18.1
+librosa

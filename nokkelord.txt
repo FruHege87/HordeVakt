@@ -1,0 +1,14 @@
+# Ett ord eller uttrykk per linje. Store/små bokstaver spiller ingen rolle.
+# Når et av disse blir sagt i strømmen, får du et varsel med en gang.
+# Legg gjerne til nye hint underveis (rediger fila direkte på GitHub).
+ekorn
+nebb
+rett i nebbet
+ld67
+ld 67
+hint
+kode
+ledetråd
+kilometer
+kommune
+fylke
