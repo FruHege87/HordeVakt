@@ -1,0 +1,60 @@
+name: Hordevakt
+
+on:
+  workflow_dispatch:
+    inputs:
+      test:
+        description: "Kort test (ca. 10 min) i stedet for full kjøring"
+        type: boolean
+        default: true
+  schedule:
+    # Hver 6. time (UTC). Hver kjøring varer i ca. 5 t 45 min.
+    - cron: "0 */6 * * *"
+
+concurrency:
+  group: hordevakt
+  cancel-in-progress: false
+
+jobs:
+  lytt:
+    runs-on: ubuntu-latest
+    timeout-minutes: 358
+    env:
+      NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
+      STREAM_URL: ${{ vars.STREAM_URL }}
+      TEST: ${{ github.event_name == 'workflow_dispatch' && inputs.test && '1' || '0' }}
+      KJORETID_MIN: "340"
+      TFHUB_CACHE_DIR: ${{ github.workspace }}/.modeller/tfhub
+      HF_HOME: ${{ github.workspace }}/.modeller/hf
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+
+      - name: Installer ffmpeg
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg
+
+      - name: Installer Python-pakker
+        run: pip install -q -r requirements.txt
+
+      - name: Hent lagrede modeller
+        uses: actions/cache@v4
+        with:
+          path: .modeller
+          key: modeller-v1
+
+      - name: Legg inn YouTube-cookies (hvis satt)
+        env:
+          YT_COOKIES: ${{ secrets.YT_COOKIES }}
+        run: |
+          if [ -n "$YT_COOKIES" ]; then printf '%s\n' "$YT_COOKIES" > cookies.txt; echo "Cookies lagt inn"; else echo "Ingen cookies"; fi
+
+      - name: Lytt på strømmen
+        run: python hordevakt.py
